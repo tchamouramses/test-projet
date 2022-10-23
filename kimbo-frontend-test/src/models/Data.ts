@@ -7,5 +7,6 @@ export interface Data {
     contenue?: string,
     model_id?: Model,
     model?: Model,
-    saveModel?: boolean
+    template?: string,
+    id?: number,
 }

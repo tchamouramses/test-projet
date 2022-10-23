@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Datas;
-use App\Models\Model;
 use App\Models\ResponseEntity;
+use App\Services\DataService;
 use Illuminate\Http\Request;
+use thiagoalessio\TesseractOCR\TesseractOCR;
 
 class DataController extends Controller
 {
@@ -15,47 +16,57 @@ class DataController extends Controller
         $response = new ResponseEntity();
         $response->data = $data;
         $response->message = 'liste des données';
+        $response->status = 200;
         return response()->json($response);
     }
 
 
-    public function create(Request $request)
+    public function extract(Request $request)
     {
-        $request->validate([
-            'nom_medecin' => 'required',
-            'tarif' => 'required',
-            'nom_hopital' => 'required',
-            'contenue' => 'required',
-            'model_id' => 'required',
-            'saveModel' => 'required'
-        ]);
         $response = new ResponseEntity();
-        $model = $request->model_id;
-        $saveModel = $request->saveModel;
-        $existingModel = Model::whereNom($model['nom'])->first();
-        if (!$existingModel) {
-            if ($saveModel == false) {
-                $response->message = 'le model n\'existe pas';
-                $response->status = 404;
-                return response()->json($response);
-            } else {
-                $model = Model::create(['nom' => $model['nom'], 'template' => $model['template']]);
-            }
-        } else {
-            $model = $existingModel;
+        if (!$request->hasFile('image')) {
+            $response->data = null;
+            $response->message = 'no file selected';
+            $response->status = 404;
+            return response()->json($response);
         }
-        $data = $request->only(['nom_medecin', 'tarif', 'nom_hopital', 'contenue']);
-        $data['model_id'] = $model->id;
-        $result = Datas::create($data);
-        $response->message = 'création effectué avec success';
+        $ocr = new TesseractOCR();
+        $ocr->image($request->file('image'));
+        $res = $ocr->run();
+        $dataService = new DataService();
+        // $response->data = $res;
+        $response->data = $dataService->dataExtraction($res);
+        $response->message = 'liste des données';
         $response->status = 200;
-        $response->data = $result;
         return response()->json($response);
     }
 
     public function delete(Datas $data)
     {
-        $result = $data->delete();
-        return response()->json($result, 200);
+        $data->delete();
+        $response = new ResponseEntity();
+        $response->message = 'suppression effectué avec success!!!';
+        $response->status = 200;
+        return response()->json($response);
+    }
+
+    public function create(Request $request)
+    {
+        $request->validate([
+            'nom_medecin' => 'required',
+            'nom_hopital' => 'required',
+            'tarif' => 'required',
+            'model_id' => 'required'
+        ]);
+        $data = new Datas($request->all());
+        $data = $data->save();
+        $response = new ResponseEntity();
+        $response->status = 200;
+        $response->message = 'suppression effectué avec success!!!';
+        if ($data) {
+            $response->status = 404;
+            $response->message = 'erreur!!! model inexistant';
+        }
+        return response()->json($response);
     }
 }

@@ -1,13 +1,12 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { viewRoutingModule } from './view-routing.module';
-import { PdfViewerModule } from 'ng2-pdf-viewer';
 import { NavBarComponent } from '../components/nav-bar/nav-bar.component';
 import { IndexComponent } from './index/index.component';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BodyComponent } from '../components/body/body.component';
-import { ImageCropperModule } from 'ngx-image-cropper';
 import { DataService } from 'src/services/data.service';
+import { ModelService } from 'src/services/model.service';
 
 
 
@@ -20,12 +19,12 @@ import { DataService } from 'src/services/data.service';
   imports: [
     CommonModule,
     viewRoutingModule,
-    PdfViewerModule,
     FormsModule,
-    ImageCropperModule
+    ReactiveFormsModule,
   ],
   providers: [
     DataService,
+    ModelService,
   ]
 })
 export class ViewModule { }

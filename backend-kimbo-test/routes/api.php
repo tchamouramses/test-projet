@@ -19,9 +19,12 @@ use Illuminate\Support\Facades\Route;
 Route::controller(DataController::class)->prefix('data')->group(function () {
     Route::get('/', 'records');
     Route::post('/', 'create');
+    Route::post('/extract', 'extract');
     Route::delete('/{data}', 'delete');
 });
 
 Route::controller(ModelController::class)->prefix('model')->group(function () {
     Route::get('/', 'records');
+    Route::post('/', 'create');
+    Route::delete('/{model}', 'delete');
 });
